@@ -82,7 +82,7 @@ class RecipeTextDataset(Dataset):
     def __init__(
         self, 
         lmdb_file=f'/common/home/as3503/as3503/courses/cs536/dataset/Recipe1M.lmdb',
-        part=''):
+        part='', recipe_part=''):
 
         assert part in ['', 'train', 'val', 'test'], "part has to be in ['', 'train', 'val', 'test']"
 
@@ -105,7 +105,7 @@ class RecipeTextDataset(Dataset):
             readahead=False,
             meminit=False,
         )
-
+        self.recipe_part = recipe_part
         if not self.env:
             raise IOError('Cannot open lmdb dataset', lmdb_file)
 
@@ -126,10 +126,13 @@ class RecipeTextDataset(Dataset):
             key = f'instructions-{rcp_id}'.encode('utf-8')
             instructions = txn.get(key).decode('utf-8')
 
-        txt = '\n'.join([title, ingredients, instructions])
-        return txt
+        return {
+            'title': title,
+            'ingredients': ingredients,
+            'instructions': instructions
+        }
 
     def __getitem__(self, index):
         rcp_key = self.keys[index]
         txt = self._load_recipe(rcp_key)
-        return txt
+        return txt[self.recipe_part]

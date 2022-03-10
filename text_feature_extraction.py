@@ -25,15 +25,18 @@ if __name__ == '__main__':
 
 
 
-    for part in ('train', 'test', 'val'):
-        dataset = RecipeTextDataset(part=part)
-        dataloader = DataLoader(dataset, batch_size=args.batch_size)
-        save_path = os.path.join(args.save_dir, f'{part}_embeddings.pkl')
-        with torch.no_grad():
-            for recipe in tqdm(dataloader):
-                model_inputs = tokenizer(recipe, return_tensors='pt', truncation=True, padding=True).to(device)
-                embeddings = model(**model_inputs)
-                pickler(obj=embeddings.cpu().numpy(), fpath=save_path, mode='ab')
+    # for part in ('train', 'test', 'val'):
+        # for recipe_part in ('title', 'ingredients', 'instructions'):
+    for part in ('test', 'val'):
+        for recipe_part in ('title', 'ingredients'):    
+            dataset = RecipeTextDataset(part=part, recipe_part=recipe_part)
+            dataloader = DataLoader(dataset, batch_size=args.batch_size)
+            save_path = os.path.join(args.save_dir, f'text_{recipe_part}_{part}_embeddings.pkl')
+            with torch.no_grad():
+                for recipe in tqdm(dataloader):
+                    model_inputs = tokenizer(recipe, return_tensors='pt', truncation=True, padding=True).to(device)
+                    embeddings = model(**model_inputs)
+                    pickler(obj=embeddings.cpu().numpy(), fpath=save_path, mode='ab')
 
 
 
