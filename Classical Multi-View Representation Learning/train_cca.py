@@ -5,6 +5,8 @@ from datetime import datetime
 # from sklearn.cross_decomposition import CCA
 from cca_zoo.models import CCA
 
+from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH
+
 
 def print_current_time():
     print("Time: ", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -31,9 +33,9 @@ def create_dataset(filepath: str):
 
 
 print_current_time()
-image_data = create_dataset('../data/image_features/image_train_embeddings.pkl')
+image_data = create_dataset(TRAIN_IMAGE_PATH)
 print_current_time()
-text_data = create_dataset('../data/embeddings_mean/text_title_train_embeddings.pkl')
+text_data = create_dataset(TRAIN_TEXT_PATH)
 
 print('Input image shape', image_data.shape)
 print('Input text shape', text_data.shape)
