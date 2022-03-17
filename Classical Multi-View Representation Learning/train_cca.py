@@ -2,10 +2,9 @@ import pickle
 import numpy as np
 from datetime import datetime
 
-# from sklearn.cross_decomposition import CCA
 from cca_zoo.models import CCA
-
-from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH
+from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH, VALIDATION_IMAGE_PATH, VALIDATION_TEXT_PATH
+from helper import rank
 
 
 def print_current_time():
@@ -33,24 +32,38 @@ def create_dataset(filepath: str):
 
 
 print_current_time()
-image_data = create_dataset(TRAIN_IMAGE_PATH)
+image_train_data = create_dataset(TRAIN_IMAGE_PATH)
 print_current_time()
-text_data = create_dataset(TRAIN_TEXT_PATH)
+text_train_data = create_dataset(TRAIN_TEXT_PATH)
 
-print('Input image shape', image_data.shape)
-print('Input text shape', text_data.shape)
+print('Train image shape', image_train_data.shape)
+print('Train text shape', text_train_data.shape)
+
+print_current_time()
+image_val_data = create_dataset(VALIDATION_IMAGE_PATH)
+print_current_time()
+text_val_data = create_dataset(VALIDATION_TEXT_PATH)
+
+print('Validation image shape', image_val_data.shape)
+print('Validation text shape', text_val_data.shape)
 
 cca = CCA(latent_dims=100)
+# cca = CCA(n_components=100, algorithm="svd")
+# cca = linear_cca()
 
 print('Starting Training')
 print_current_time()
-cca.fit((image_data, text_data))
-print('Ending Training')
-print('Start transforming')
-image_data_c, text_data_c = cca.transform((image_data, text_data))
-print(image_data_c)
-print(text_data_c)
-print(image_data_c.shape)
-print(text_data_c.shape)
+cca.fit((image_train_data, text_train_data))
 print_current_time()
-print('End transforming')
+print('Ending Training')
+
+print('Start transforming and calculating ranks')
+image_data_c, text_data_c = cca.transform((image_val_data, text_val_data))
+medr, recall_k = rank(1000, "image", image_data_c, text_data_c)
+
+print('Median', medr)
+print('Recall', recall_k)
+# image_data_c, text_data_c = cca.test(image_data, text_data)
+
+print_current_time()
+print('End transforming and calculating ranks')
