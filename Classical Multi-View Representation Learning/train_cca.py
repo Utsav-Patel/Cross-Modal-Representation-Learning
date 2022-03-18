@@ -4,8 +4,8 @@ import numpy as np
 from datetime import datetime
 
 from cca_zoo.models import CCA
-from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH, VALIDATION_IMAGE_PATH, VALIDATION_TEXT_PATH, SEARCH_POOL,\
-    TEXT_ELEMENT, TYPE_EMBEDDING
+from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH, VALIDATION_IMAGE_PATH, VALIDATION_TEXT_PATH, TEXT_ELEMENT,\
+    TYPE_EMBEDDING
 from helper import rank
 
 
@@ -51,15 +51,18 @@ def compute_rank(latent_dims: int):
     else:
         text_data_c, image_data_c = cca.transform((text_val_data, image_val_data))
 
-    medr, recall_k = rank(SEARCH_POOL, TYPE_EMBEDDING, image_data_c, text_data_c)
+    medr_1k, recall_k_1k = rank(1000, TYPE_EMBEDDING, image_data_c, text_data_c)
+    print('search pool 1k latent dimensions', latent_dims, 'Median ', medr_1k)
+    print('search pool 1k latent dimensions', latent_dims, 'Recall', recall_k_1k)
 
-    print('latent dimensions', latent_dims, 'Median ', medr)
-    print('latent dimensions', latent_dims, 'Recall', recall_k)
+    medr_10k, recall_k_10k = rank(10000, TYPE_EMBEDDING, image_data_c, text_data_c)
+    print('search pool 10k latent dimensions', latent_dims, 'Median ', medr_10k)
+    print('search pool 10k latent dimensions', latent_dims, 'Recall', recall_k_10k)
 
     print_current_time()
     print('End transforming and calculating ranks')
 
-    return medr, recall_k
+    return medr_1k, recall_k_1k, medr_10k, recall_k_10k
 
 
 if __name__ == "__main__":
@@ -90,19 +93,27 @@ if __name__ == "__main__":
     # final_list = range(1, MAX_LATENT_DIMENSION + 1)
     # results = p.map(compute_rank, final_list)
 
-    medr_list = list()
-    recall_k_list = list()
+    medr_1k_list = list()
+    recall_k_1k_list = list()
+    medr_10k_list = list()
+    recall_k_10k_list = list()
 
     for latent_dims in latent_dims_list:
         result = compute_rank(latent_dims)
-        medr_list.append(result[0])
-        recall_k_list.append(result[1])
+        medr_1k_list.append(result[0])
+        recall_k_1k_list.append(result[1])
+        medr_10k_list.append(result[2])
+        recall_k_10k_list.append(result[3])
 
-    print(medr_list)
-    print(recall_k_list)
+    print(medr_1k_list)
+    print(recall_k_1k_list)
+    print(medr_10k_list)
+    print(recall_k_10k_list)
 
-    with open('./results/cca_' + TEXT_ELEMENT + '_' + str(SEARCH_POOL) + '.pkl', 'wb') as f:
-        pickle.dump({'medr': medr_list, 'recall_k': recall_k_list, 'latent_dims': latent_dims_list},
-                    f)
+    with open('./results/cca_' + TEXT_ELEMENT + '_1k' + '.pkl', 'wb') as f:
+        pickle.dump({'medr': medr_1k_list, 'recall_k': recall_k_1k_list, 'latent_dims': latent_dims_list}, f)
+
+    with open('./results/cca_' + TEXT_ELEMENT + '_10k' + '.pkl', 'wb') as f:
+        pickle.dump({'medr': medr_10k_list, 'recall_k': recall_k_10k_list, 'latent_dims': latent_dims_list}, f)
 
 

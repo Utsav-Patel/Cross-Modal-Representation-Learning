@@ -1,6 +1,5 @@
 import multiprocessing as mp
 
-SEARCH_POOL = 1000
 TEXT_ELEMENT = "title"
 TYPE_EMBEDDING = "image"
 
