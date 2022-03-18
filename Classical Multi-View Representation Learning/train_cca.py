@@ -1,9 +1,12 @@
 import pickle
+import multiprocessing as mp
 import numpy as np
+
 from datetime import datetime
 
 from cca_zoo.models import CCA
-from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH, VALIDATION_IMAGE_PATH, VALIDATION_TEXT_PATH
+from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH, VALIDATION_IMAGE_PATH, VALIDATION_TEXT_PATH,\
+    MAX_LATENT_DIMENSION, SEARCH_POOL, TEXT_ELEMENT
 from helper import rank
 
 
@@ -31,39 +34,72 @@ def create_dataset(filepath: str):
     return data
 
 
-print_current_time()
-image_train_data = create_dataset(TRAIN_IMAGE_PATH)
-print_current_time()
-text_train_data = create_dataset(TRAIN_TEXT_PATH)
+def compute_rank(data: list):
 
-print('Train image shape', image_train_data.shape)
-print('Train text shape', text_train_data.shape)
+    image_train_data = data[0]
+    image_val_data = data[1]
+    text_train_data = data[2]
+    text_val_data = data[3]
+    latent_dims = data[4]
 
-print_current_time()
-image_val_data = create_dataset(VALIDATION_IMAGE_PATH)
-print_current_time()
-text_val_data = create_dataset(VALIDATION_TEXT_PATH)
+    cca = CCA(latent_dims=latent_dims)
+    print('Starting Training for', latent_dims)
+    print_current_time()
+    cca.fit((image_train_data, text_train_data))
+    print('Ending Training for', latent_dims)
+    print_current_time()
 
-print('Validation image shape', image_val_data.shape)
-print('Validation text shape', text_val_data.shape)
+    print('Start transforming and calculating ranks')
+    image_data_c, text_data_c = cca.transform((image_val_data, text_val_data))
+    medr, recall_k = rank(SEARCH_POOL, "image", image_data_c, text_data_c)
 
-cca = CCA(latent_dims=100)
-# cca = CCA(n_components=100, algorithm="svd")
-# cca = linear_cca()
+    print('latent dimensions', latent_dims, 'Median ', medr)
+    print('latent dimensions', latent_dims, 'Recall', recall_k)
 
-print('Starting Training')
-print_current_time()
-cca.fit((image_train_data, text_train_data))
-print_current_time()
-print('Ending Training')
+    print_current_time()
+    print('End transforming and calculating ranks')
 
-print('Start transforming and calculating ranks')
-image_data_c, text_data_c = cca.transform((image_val_data, text_val_data))
-medr, recall_k = rank(1000, "image", image_data_c, text_data_c)
+    return medr, recall_k
 
-print('Median', medr)
-print('Recall', recall_k)
-# image_data_c, text_data_c = cca.test(image_data, text_data)
 
-print_current_time()
-print('End transforming and calculating ranks')
+if __name__ == "__main__":
+
+    print_current_time()
+    image_train_data = create_dataset(TRAIN_IMAGE_PATH)
+    print_current_time()
+    text_train_data = create_dataset(TRAIN_TEXT_PATH)
+
+    print('Train image shape', image_train_data.shape)
+    print('Train text shape', text_train_data.shape)
+
+    print_current_time()
+    image_val_data = create_dataset(VALIDATION_IMAGE_PATH)
+    print_current_time()
+    text_val_data = create_dataset(VALIDATION_TEXT_PATH)
+
+    print('Validation image shape', image_val_data.shape)
+    print('Validation text shape', text_val_data.shape)
+
+    n_cores = int(mp.cpu_count())
+    print('Number of cores', n_cores)
+    p = mp.Pool(processes=n_cores)
+
+    final_list = [[image_train_data, image_val_data, text_train_data, text_val_data, x]
+                  for x in range(1, MAX_LATENT_DIMENSION+1)]
+    results = p.map(compute_rank, final_list)
+
+    medr_list = list()
+    recall_k_list = list()
+
+    for result in results:
+        medr_list.append(result[0])
+        recall_k_list.append(result[1])
+
+    print(medr_list)
+    print(recall_k_list)
+
+    with open('./results/cca_' + TEXT_ELEMENT + '_' + str(SEARCH_POOL) + '.pkl', 'wb') as f:
+        pickle.dump({'medr': medr_list, 'recall_k': recall_k_list, 'latent_dims': range(1, MAX_LATENT_DIMENSION + 1)},
+                    f)
+
+
