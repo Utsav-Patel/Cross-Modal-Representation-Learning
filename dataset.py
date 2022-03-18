@@ -129,7 +129,8 @@ class RecipeTextDataset(Dataset):
         return {
             'title': title,
             'ingredients': ingredients,
-            'instructions': instructions
+            'instructions': instructions,
+            'all': '\n'.join([title, ingredients, instructions])
         }
 
     def __getitem__(self, index):

@@ -16,18 +16,20 @@ if __name__ == '__main__':
     parser.add_argument('--device', default='cuda', type=str)
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--lmdb_file', default='/common/home/as3503/as3503/courses/cs536/dataset/Recipe1M.lmdb')
-    parser.add_argument('--save_dir', default='/common/home/as3503/as3503/courses/cs536/embeddings/')
+    parser.add_argument('--save_dir', default='/common/home/as3503/as3503/courses/cs536/embeddings_all/')
     parser.add_argument('--means', default=False, type=bool)
+    parser.add_argument('--part', default=['train', 'test', 'val'], nargs='+')
+    parser.add_argument('--recipe_part', default=['title', 'ingredients', 'instructions', 'all'], nargs='+')
     args = parser.parse_args()
     device = args.device
     model = BertEncoder(means=args.means).to(device)
     model.eval()
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    os.makedirs(args.save_dir, exist_ok=True)
 
 
-
-    for part in ('train', 'test', 'val'):
-        for recipe_part in ('title', 'ingredients', 'instructions'):
+    for part in args.part:
+        for recipe_part in args.recipe_part:
             dataset = RecipeTextDataset(part=part, recipe_part=recipe_part)
             dataloader = DataLoader(dataset, batch_size=args.batch_size)
             save_path = os.path.join(args.save_dir, f'text_{recipe_part}_{part}_embeddings.pkl')
