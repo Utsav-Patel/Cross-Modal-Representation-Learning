@@ -6,7 +6,7 @@ from datetime import datetime
 
 from cca_zoo.models import CCA
 from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH, VALIDATION_IMAGE_PATH, VALIDATION_TEXT_PATH,\
-    MAX_LATENT_DIMENSION, SEARCH_POOL, TEXT_ELEMENT
+    MAX_LATENT_DIMENSION, MIN_LATENT_DIMENSION, SEARCH_POOL, TEXT_ELEMENT
 from helper import rank
 
 
@@ -82,10 +82,11 @@ if __name__ == "__main__":
 
     n_cores = int(mp.cpu_count())
     print('Number of cores', n_cores)
-    p = mp.Pool(processes=n_cores)
+    p = mp.Pool(processes=1)
 
     final_list = [[image_train_data, image_val_data, text_train_data, text_val_data, x]
-                  for x in range(1, MAX_LATENT_DIMENSION+1)]
+                  for x in range(MIN_LATENT_DIMENSION, MAX_LATENT_DIMENSION+1)]
+    # final_list = range(1, MAX_LATENT_DIMENSION + 1)
     results = p.map(compute_rank, final_list)
 
     medr_list = list()
@@ -98,7 +99,8 @@ if __name__ == "__main__":
     print(medr_list)
     print(recall_k_list)
 
-    with open('./results/cca_' + TEXT_ELEMENT + '_' + str(SEARCH_POOL) + '.pkl', 'wb') as f:
+    with open('./results/cca_' + TEXT_ELEMENT + '_' + str(SEARCH_POOL) + "_" + str(MIN_LATENT_DIMENSION) + "_" +
+              str(MAX_LATENT_DIMENSION) + '.pkl', 'wb') as f:
         pickle.dump({'medr': medr_list, 'recall_k': recall_k_list, 'latent_dims': range(1, MAX_LATENT_DIMENSION + 1)},
                     f)
 

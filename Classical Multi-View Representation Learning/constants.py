@@ -2,7 +2,8 @@ import multiprocessing as mp
 
 SEARCH_POOL = 1000
 TEXT_ELEMENT = "title"
-MAX_LATENT_DIMENSION = 100
+MIN_LATENT_DIMENSION = 1
+MAX_LATENT_DIMENSION = 20
 
 if mp.cpu_count() >= 10:
     TRAIN_IMAGE_PATH = "/freespace/local/as3503/536/image_features/image_train_embeddings.pkl"
