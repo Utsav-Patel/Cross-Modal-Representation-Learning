@@ -17,20 +17,16 @@ def create_dataset(filepath: str):
 
     print('Fetching data from file', filepath)
     f = open(filepath, 'rb')
-    data = None
+    data = list()
 
     while True:
         try:
-            tmp = pickle.load(f)
-            if data is None:
-                data = tmp
-            else:
-                data = np.vstack((data, tmp))
+            data.append(pickle.load(f))
         except EOFError:
             break
 
     print('Completed fetching data from file', filepath)
-    return data
+    return np.vstack(data)
 
 
 def compute_rank(latent_dims: int):
