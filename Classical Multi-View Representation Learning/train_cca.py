@@ -101,7 +101,7 @@ if __name__ == "__main__":
     print(medr_list)
     print(recall_k_list)
 
-    with open('./results/cca_' + TEXT_ELEMENT + '_' + str(SEARCH_POOL) + "_" + '.pkl', 'wb') as f:
+    with open('./results/cca_' + TEXT_ELEMENT + '_' + str(SEARCH_POOL) + '.pkl', 'wb') as f:
         pickle.dump({'medr': medr_list, 'recall_k': recall_k_list, 'latent_dims': latent_dims_list},
                     f)
 
