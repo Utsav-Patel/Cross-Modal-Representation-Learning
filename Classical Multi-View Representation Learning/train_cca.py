@@ -21,7 +21,8 @@ def create_dataset(filepath: str):
 
     while True:
         try:
-            data.append(pickle.load(f))
+            # data.append(pickle.load(f))
+            return pickle.load(f)
         except EOFError:
             break
 
@@ -76,25 +77,45 @@ def compute_rank(latent_dims: int):
 if __name__ == "__main__":
 
     print_current_time()
-    image_train_data = create_dataset(TRAIN_IMAGE_PATH)
-    print_current_time()
-    text_train_data = create_dataset(TRAIN_TEXT_PATH)
+    # image_train_data = create_dataset(TRAIN_IMAGE_PATH)
+    # print_current_time()
+    # text_train_data = create_dataset(TRAIN_TEXT_PATH)
+    data = create_dataset(TRAIN_IMAGE_PATH)
+    image_train_data = data[0]
+    if TEXT_ELEMENT == "all":
+        text_train_data = data[1]
+    else:
+        text_train_data = create_dataset(TRAIN_TEXT_PATH)[0]
 
     print('Train image shape', image_train_data.shape)
     print('Train text shape', text_train_data.shape)
 
-    print_current_time()
-    image_val_data = create_dataset(VALIDATION_IMAGE_PATH)
-    print_current_time()
-    text_val_data = create_dataset(VALIDATION_TEXT_PATH)
+    # print_current_time()
+    # image_val_data = create_dataset(VALIDATION_IMAGE_PATH)
+    # print_current_time()
+    # text_val_data = create_dataset(VALIDATION_TEXT_PATH)
+
+    data = create_dataset(VALIDATION_IMAGE_PATH)
+    image_val_data = data[0]
+    if TEXT_ELEMENT == "all":
+        text_val_data = data[1]
+    else:
+        text_val_data = create_dataset(VALIDATION_TEXT_PATH)[0]
 
     print('Validation image shape', image_val_data.shape)
     print('Validation text shape', text_val_data.shape)
 
-    print_current_time()
-    image_test_data = create_dataset(TEST_IMAGE_PATH)
-    print_current_time()
-    text_test_data = create_dataset(TEST_TEXT_PATH)
+    # print_current_time()
+    # image_test_data = create_dataset(TEST_IMAGE_PATH)
+    # print_current_time()
+    # text_test_data = create_dataset(TEST_TEXT_PATH)
+
+    data = create_dataset(TEST_IMAGE_PATH)
+    image_test_data = data[0]
+    if TEXT_ELEMENT == "all":
+        text_test_data = data[1]
+    else:
+        text_test_data = create_dataset(TEST_TEXT_PATH)[0]
 
     print('Test image shape', image_test_data.shape)
     print('Test text shape', text_test_data.shape)
@@ -131,16 +152,16 @@ if __name__ == "__main__":
         medr_10k_test_list.append(result[6])
         recall_k_10k_test_list.append(result[7])
 
-    with open('./results/val_cca_' + TEXT_ELEMENT + '_1k' + '.pkl', 'wb') as f:
+    with open('./results/prof_val_cca_' + TEXT_ELEMENT + '_1k' + '.pkl', 'wb') as f:
         pickle.dump({'medr': medr_1k_val_list, 'recall_k': recall_k_1k_val_list, 'latent_dims': latent_dims_list}, f)
 
-    with open('./results/val_cca_' + TEXT_ELEMENT + '_10k' + '.pkl', 'wb') as f:
+    with open('./results/prof_val_cca_' + TEXT_ELEMENT + '_10k' + '.pkl', 'wb') as f:
         pickle.dump({'medr': medr_10k_val_list, 'recall_k': recall_k_10k_val_list, 'latent_dims': latent_dims_list}, f)
 
-    with open('./results/test_cca_' + TEXT_ELEMENT + '_1k' + '.pkl', 'wb') as f:
+    with open('./results/prof_test_cca_' + TEXT_ELEMENT + '_1k' + '.pkl', 'wb') as f:
         pickle.dump({'medr': medr_1k_test_list, 'recall_k': recall_k_1k_test_list, 'latent_dims': latent_dims_list}, f)
 
-    with open('./results/test_cca_' + TEXT_ELEMENT + '_10k' + '.pkl', 'wb') as f:
+    with open('./results/prof_test_cca_' + TEXT_ELEMENT + '_10k' + '.pkl', 'wb') as f:
         pickle.dump({'medr': medr_10k_test_list, 'recall_k': recall_k_10k_test_list, 'latent_dims': latent_dims_list}, f)
 
 
