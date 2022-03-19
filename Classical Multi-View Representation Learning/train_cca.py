@@ -152,16 +152,16 @@ if __name__ == "__main__":
         medr_10k_test_list.append(result[6])
         recall_k_10k_test_list.append(result[7])
 
-    with open('./results/prof_val_cca_' + TEXT_ELEMENT + '_1k' + '.pkl', 'wb') as f:
+    with open('./results/prof_val_cca_' + TEXT_ELEMENT + "_" + TYPE_EMBEDDING + '_1k' + '.pkl', 'wb') as f:
         pickle.dump({'medr': medr_1k_val_list, 'recall_k': recall_k_1k_val_list, 'latent_dims': latent_dims_list}, f)
 
-    with open('./results/prof_val_cca_' + TEXT_ELEMENT + '_10k' + '.pkl', 'wb') as f:
+    with open('./results/prof_val_cca_' + TEXT_ELEMENT + "_" + TYPE_EMBEDDING + '_10k' + '.pkl', 'wb') as f:
         pickle.dump({'medr': medr_10k_val_list, 'recall_k': recall_k_10k_val_list, 'latent_dims': latent_dims_list}, f)
 
-    with open('./results/prof_test_cca_' + TEXT_ELEMENT + '_1k' + '.pkl', 'wb') as f:
+    with open('./results/prof_test_cca_' + TEXT_ELEMENT + "_" + TYPE_EMBEDDING + '_1k' + '.pkl', 'wb') as f:
         pickle.dump({'medr': medr_1k_test_list, 'recall_k': recall_k_1k_test_list, 'latent_dims': latent_dims_list}, f)
 
-    with open('./results/prof_test_cca_' + TEXT_ELEMENT + '_10k' + '.pkl', 'wb') as f:
+    with open('./results/prof_test_cca_' + TEXT_ELEMENT + "_" + TYPE_EMBEDDING + '_10k' + '.pkl', 'wb') as f:
         pickle.dump({'medr': medr_10k_test_list, 'recall_k': recall_k_10k_test_list, 'latent_dims': latent_dims_list}, f)
 
 

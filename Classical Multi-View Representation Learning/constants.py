@@ -1,7 +1,7 @@
 import multiprocessing as mp
 
 TEXT_ELEMENT = "all"
-TYPE_EMBEDDING = "image"
+TYPE_EMBEDDING = "text"
 
 if mp.cpu_count() >= 10:
     # TRAIN_IMAGE_PATH = "/freespace/local/as3503/536/image_features/image_train_embeddings.pkl"
