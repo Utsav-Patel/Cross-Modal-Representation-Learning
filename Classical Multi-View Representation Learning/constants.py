@@ -16,9 +16,9 @@ if mp.cpu_count() >= 10:
     # VALIDATION_TEXT_PATH = "/freespace/local/as3503/536/embeddings_all_means/text_" + TEXT_ELEMENT + "_val_embeddings.pkl"
     # TEST_TEXT_PATH = "/freespace/local/as3503/536/embeddings_all_means/text_" + TEXT_ELEMENT + "_test_embeddings.pkl"
 
-    TRAIN_TEXT_PATH = "/common/home/upp10/Desktop/Cross-Modal-Representation-Learning/data/professor/" + TEXT_ELEMENT + "embeddings_train.pkl"
-    VALIDATION_TEXT_PATH = "/common/home/upp10/Desktop/Cross-Modal-Representation-Learning/data/professor/" + TEXT_ELEMENT + "embeddings_val.pkl"
-    TEST_TEXT_PATH = "/common/home/upp10/Desktop/Cross-Modal-Representation-Learning/data/professor/" + TEXT_ELEMENT + "embeddings_test.pkl"
+    TRAIN_TEXT_PATH = "/common/home/upp10/Desktop/Cross-Modal-Representation-Learning/data/professor/" + TEXT_ELEMENT + "_embeddings_train.pkl"
+    VALIDATION_TEXT_PATH = "/common/home/upp10/Desktop/Cross-Modal-Representation-Learning/data/professor/" + TEXT_ELEMENT + "_embeddings_val.pkl"
+    TEST_TEXT_PATH = "/common/home/upp10/Desktop/Cross-Modal-Representation-Learning/data/professor/" + TEXT_ELEMENT + "_embeddings_test.pkl"
 
 else:
     TRAIN_IMAGE_PATH = "D:/My_Files/Rutgers/Courses/536 - Machine Learning/Project/" \
