@@ -59,4 +59,7 @@ print("Indexes:", sorting[:10])
 for ind in sorting[:10]:
     print(ids[ind], end=" ")
 print("Expected index:", id_to_ind[required_ids[2]])
-print(ids[id_to_ind[required_ids[2]]])
+print(ids[id_to_ind[required_ids[3]]])
+
+with open('model.pkl', 'wb') as f:
+    pickle.dump(cca, f)
