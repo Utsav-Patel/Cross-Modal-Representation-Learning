@@ -1,6 +1,6 @@
 import multiprocessing as mp
 
-TEXT_ELEMENT = "all"
+TEXT_ELEMENT = "title"
 TYPE_EMBEDDING = "text"
 
 if mp.cpu_count() >= 10:
