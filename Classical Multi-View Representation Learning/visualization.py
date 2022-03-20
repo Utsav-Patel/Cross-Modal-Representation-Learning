@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 
 from cca_zoo.models import CCA
-from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH, VALIDATION_IMAGE_PATH, VALIDATION_TEXT_PATH
+from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH
 
 
 def create_dataset(filepath: str):
@@ -56,4 +56,7 @@ sims = np.dot(required_test_embedding, img_train_r.T)
 sorting = np.argsort(sims)[::-1].tolist()
 
 print("Indexes:", sorting[:10])
+for ind in sorting[:10]:
+    print(ids[ind], end=" ")
 print("Expected index:", id_to_ind[required_ids[2]])
+print(ids[id_to_ind[required_ids[2]]])
