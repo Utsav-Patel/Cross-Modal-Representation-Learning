@@ -11,6 +11,15 @@ from io import BytesIO
 
 
 class Recipe1MDataset(Dataset):
+    """
+    Dataset class for Recipe1M
+    Attributes:
+    part: train/val/test
+    transform: image transforms
+
+    Returns:
+    text/image pair
+    """
     def __init__(
         self, 
         lmdb_file=f'/common/home/as3503/as3503/courses/cs536/dataset/Recipe1M.lmdb',
@@ -79,6 +88,16 @@ class Recipe1MDataset(Dataset):
 
 
 class RecipeTextDataset(Dataset):
+    """
+    Dataset class for Recipe1M
+    Attributes:
+    part: train/val/test
+    recipe_part: ingredients/title/instructions/all
+    transform: image transforms
+
+    Returns:
+    recipe text
+    """
     def __init__(
         self, 
         lmdb_file=f'/common/home/as3503/as3503/courses/cs536/dataset/Recipe1M.lmdb',

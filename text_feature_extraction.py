@@ -27,8 +27,9 @@ if __name__ == '__main__':
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
     os.makedirs(args.save_dir, exist_ok=True)
 
-
+    # Iterate over train/val/test
     for part in args.part:
+        # Iterate over title/ingredients/instructions/all
         for recipe_part in args.recipe_part:
             dataset = RecipeTextDataset(part=part, recipe_part=recipe_part)
             dataloader = DataLoader(dataset, batch_size=args.batch_size)

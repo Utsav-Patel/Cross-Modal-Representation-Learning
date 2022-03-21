@@ -4,6 +4,10 @@ from transformers import BertModel
 
 
 class BertEncoder(nn.Module):
+    """
+    means: boolean which decides whether to take mean of all token 
+    representations or to take cls token representation
+    """
     def __init__(self, means=False):
         super().__init__()
         self.main = BertModel.from_pretrained("bert-base-uncased")
@@ -20,6 +24,7 @@ class ResnetEncoder(nn.Module):
     def __init__(self):
         super().__init__()
         self.main = models.resnet50(pretrained=True)
+        # Removing classification layer
         self.main.fc = nn.Identity()
 
     def forward(self, img):

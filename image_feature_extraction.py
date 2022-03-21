@@ -44,6 +44,8 @@ if __name__ == '__main__':
     device = args.device
     model = ResnetEncoder().to(device)
     model.eval()
+
+    # Standard imagenet resnet mean and std for normalization
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
 
@@ -55,8 +57,7 @@ if __name__ == '__main__':
         'test': val_transform
     }
 
-
-
+    # Iterate over all dataset partitions
     for part in ('train', 'test', 'val'):
         dataset = Recipe1MDataset(part=part, transform=transform_parts[part])
         dataloader = DataLoader(dataset, batch_size=args.batch_size)
@@ -64,6 +65,7 @@ if __name__ == '__main__':
         with torch.no_grad():
             for _, images in tqdm(dataloader):
                 embeddings = model(images.to(device))
+                # Appending embeddings to pickle file
                 pickler(obj=embeddings.cpu().numpy(), fpath=save_path, mode='ab')
 
 
