@@ -1,8 +1,13 @@
+"""
+Files to define constants over the project
+"""
+
 import multiprocessing as mp
 
 TEXT_ELEMENT = "title"
 TYPE_EMBEDDING = "text"
 
+# Check which path to consider if I'll run on local and ilab
 if mp.cpu_count() >= 10:
     # TRAIN_IMAGE_PATH = "/freespace/local/as3503/536/image_features/image_train_embeddings.pkl"
     # VALIDATION_IMAGE_PATH = "/freespace/local/as3503/536/image_features/image_val_embeddings.pkl"
