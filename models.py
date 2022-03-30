@@ -25,7 +25,8 @@ class ResnetEncoder(nn.Module):
         super().__init__()
         self.main = models.resnet50(pretrained=True)
         # Removing classification layer
-        self.main.fc = nn.Identity()
+        num_feat = self.main.fc.in_features
+        self.main.fc = nn.Linear(num_feat, 768)
 
     def forward(self, img):
         return self.main(img)
