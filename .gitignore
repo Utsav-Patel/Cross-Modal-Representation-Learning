@@ -130,6 +130,6 @@ dmypy.json
 .idea/
 
 data/
-
+Classical Multi-View Representation Learning/results/
 # Personal tests
 test_dir/

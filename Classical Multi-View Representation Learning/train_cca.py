@@ -1,9 +1,12 @@
+"""
+This file is useful to train linear CCA on recipe1M dataset.
+"""
 import pickle
 import numpy as np
 
 from datetime import datetime
-
 from cca_zoo.models import CCA
+
 from constants import TRAIN_IMAGE_PATH, TRAIN_TEXT_PATH, VALIDATION_IMAGE_PATH, VALIDATION_TEXT_PATH, TEST_IMAGE_PATH,\
     TEST_TEXT_PATH, TEXT_ELEMENT, TYPE_EMBEDDING
 from helper import rank
@@ -14,7 +17,11 @@ def print_current_time():
 
 
 def create_dataset(filepath: str):
-
+    """
+    load dataset from pickle file
+    :param filepath: path of the file
+    :return: numpy array
+    """
     print('Fetching data from file', filepath)
     f = open(filepath, 'rb')
     data = list()
@@ -31,6 +38,13 @@ def create_dataset(filepath: str):
 
 
 def compute_rank_val_test(cca, image_data, text_data):
+    """
+    Compute median rank and recall@k for validation and test set.
+    :param cca: CCA object
+    :param image_data: image embeddings
+    :param text_data: text embeddings
+    :return: ranks for test and validation
+    """
     print('Start transforming and calculating ranks')
     if TYPE_EMBEDDING == "image":
         image_data_c, text_data_c = cca.transform((image_data, text_data))
@@ -52,6 +66,11 @@ def compute_rank_val_test(cca, image_data, text_data):
 
 
 def compute_rank(latent_dims: int):
+    """
+    Train CCA and compute ranks for test and validation
+    :param latent_dims: latent dimension
+    :return:
+    """
 
     cca = CCA(latent_dims=latent_dims)
     print('Starting Training for', latent_dims)
@@ -125,10 +144,6 @@ if __name__ == "__main__":
     # p = mp.Pool(processes=1)
 
     latent_dims_list = [1, 2, 5, 10, 15, 20, 30, 50, 75, 100, 150, 200, 300, 500, 700]
-    # final_list = [[image_train_data, image_val_data, text_train_data, text_val_data, x]
-    #               for x in range(MIN_LATENT_DIMENSION, MAX_LATENT_DIMENSION+1)]
-    # final_list = range(1, MAX_LATENT_DIMENSION + 1)
-    # results = p.map(compute_rank, final_list)
 
     medr_1k_val_list = list()
     recall_k_1k_val_list = list()
