@@ -4,6 +4,7 @@ import numpy as np
 import json
 import lmdb
 import random
+import pickle
 
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
@@ -156,3 +157,33 @@ class RecipeTextDataset(Dataset):
         rcp_key = self.keys[index]
         txt = self._load_recipe(rcp_key)
         return txt[self.recipe_part]
+
+
+class EmbeddingDataset(Dataset):
+    def __init__(self, image_path, text_path, part=None):
+        embeddings = self.read_pickle(image_path)
+        self.image_embeddings = torch.tensor(embeddings[0])
+        if part == 'all':
+            self.text_embeddings = torch.tensor(embeddings[1])
+        else:
+            text_embeddings = self.read_pickle(text_path)
+            self.text_embeddings = torch.tensor(text_embeddings[0])
+            
+
+    def __getitem__(self, idx):
+        return (self.image_embeddings[idx], self.text_embeddings[idx])
+
+    def __len__(self):
+        return len(self.image_embeddings)
+
+    def read_pickle(self, fpath):
+        objects = []
+        with (open(fpath, "rb")) as openfile:
+            while True:
+                try:
+                    objects.append(pickle.load(openfile))
+                except EOFError:
+                    break
+        if len(objects) == 1:
+            return objects[0]
+        return objects

@@ -30,3 +30,20 @@ class ResnetEncoder(nn.Module):
 
     def forward(self, img):
         return self.main(img)
+
+
+class Embedder(nn.Module):
+    def __init__(self, output_size, input_size=1024):
+        super().__init__()
+
+        self.layer1 = nn.Sequential(
+            nn.Linear(input_size, 512),
+            nn.BatchNorm1d(512),
+            nn.Dropout(),
+            nn.LeakyReLU()
+        )
+        self.layer2 = nn.Linear(512, output_size)
+
+    def forward(self, x):
+        x = self.layer1(x)
+        return self.layer2(x)
