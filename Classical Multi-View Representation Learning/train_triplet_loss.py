@@ -36,7 +36,7 @@ def create_retrieval_model(args, device='cuda', image_encoder='resnet'):
 
 def load_retrieval_model(ckpt_path, device='cuda', image_encoder='resnet'):
     print(f'load retrieval model from {ckpt_path}')
-    ckpt = torch.load(ckpt_path)
+    ckpt = torch.load(ckpt_path, map_location=device)
     
     ckpt_args = ckpt['args']
     if 'lr' not in ckpt_args.__dict__:
