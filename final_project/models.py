@@ -17,7 +17,7 @@ class TextEncoder(nn.Module):
     
     def forward(self, input_ids, attention_mask, token_type_ids):
         bert_outputs = self.main(input_ids, attention_mask, token_type_ids, output_attentions=True)
-        return bert_outputs.pooler_output, bert_outputs.last_hidden_state[:, 1:, :]
+        return bert_outputs.last_hidden_state
 
 
 class ImageEncoder(nn.Module):
@@ -27,4 +27,4 @@ class ImageEncoder(nn.Module):
 
     def forward(self, img):
         outputs = self.main(img)
-        return outputs.pooler_output, outputs.last_hidden_state[:, 1:, :]
+        return outputs.last_hidden_state
