@@ -68,15 +68,18 @@ class CrossModalAttention(nn.Module):
         self.cls_projection = nn.Linear(model_dim, num_classes)
         
     def forward(self, image_features, text_features, src_key_padding_mask=None):
-        cls_token = self.cls_token.expand(image_features.shape[0], -1, -1)
+        batch_size = image_features.shape[0]
+        cls_token = self.cls_token.expand(batch_size, -1, -1)
         image_features = torch.cat((cls_token, image_features), dim=1)
         image_features = image_features + self.image_pos_embed
         image_features = self.image_pos_drop(image_features)
         
         text_features = self.text_pos_embed(text_features)
         
-        sep_token = self.sep_token.expand(image_features.shape[0], -1, -1)
+        sep_token = self.sep_token.expand(batch_size, -1, -1)
         transformer_input = torch.cat((image_features, sep_token, text_features), dim=1)
+        if src_key_padding_mask is not None:
+            src_key_padding_mask = torch.cat((torch.zeros(batch_size, image_features.shape[1] + 1), src_key_padding_mask), dim=1)
         transformer_outputs = self.encoder(transformer_input, src_key_padding_mask=src_key_padding_mask)
         cls_outputs = transformer_outputs[:, 0, :]
         return self.cls_projection(cls_outputs)
