@@ -79,7 +79,7 @@ class CrossModalAttention(nn.Module):
         sep_token = self.sep_token.expand(batch_size, -1, -1)
         transformer_input = torch.cat((image_features, sep_token, text_features), dim=1)
         if src_key_padding_mask is not None:
-            src_key_padding_mask = torch.cat((torch.zeros(batch_size, image_features.shape[1] + 1), src_key_padding_mask), dim=1)
+            src_key_padding_mask = torch.cat((torch.zeros(batch_size, image_features.shape[1] + 1).to(transformer_input.device), src_key_padding_mask), dim=1)
         transformer_outputs = self.encoder(transformer_input, src_key_padding_mask=src_key_padding_mask)
         cls_outputs = transformer_outputs[:, 0, :]
         return self.cls_projection(cls_outputs)
