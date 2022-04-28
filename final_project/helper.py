@@ -2,7 +2,7 @@ import torch
 import random
 
 
-def get_transformer_input(image_features, text_embedding):
+def get_transformer_input(image_features, text_embedding, input_attention_mask):
     num_negative_to_positive_sample_ratio = 2
 
     input_batch_size = image_features.shape[0]
@@ -12,6 +12,7 @@ def get_transformer_input(image_features, text_embedding):
 
     final_image_features = torch.zeros(output_batch_size, *image_features.shape[1:])
     final_text_embeddings = torch.zeros(output_batch_size, *text_embedding.shape[1:])
+    output_attention_mask = torch.zeros(output_batch_size, input_attention_mask.shape[1:])
 
     final_image_features[:input_batch_size] = image_features
     final_text_embeddings[:input_batch_size] = text_embedding
@@ -27,8 +28,10 @@ def get_transformer_input(image_features, text_embedding):
 
         final_image_features[(1 + run_num) * input_batch_size : (2 + run_num) * input_batch_size] = image_features[a]
         final_text_embeddings[(1 + run_num) * input_batch_size : (2 + run_num) * input_batch_size] = text_embedding[b]
+        output_attention_mask[(1 + run_num) * input_batch_size : (2 + run_num) * input_batch_size] = \
+            input_attention_mask[b]
 
-    return final_image_features, final_text_embeddings, ground_truths
+    return final_image_features, final_text_embeddings, output_attention_mask, ground_truths
 
 
 def save_model(model, fpath):

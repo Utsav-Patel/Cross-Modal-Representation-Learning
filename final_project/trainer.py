@@ -19,8 +19,9 @@ def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tok
         text_inputs = tokenizer(text, truncation=True, padding=True, return_tensors="pt").to(device)
         text_outputs = text_encoder(**text_inputs)
         image_outputs = image_encoder(image.to(device))
-        transformer_image_inputs, transformer_text_inputs, ground_truth = get_transformer_input(image_outputs, text_outputs)
-        text_padding_mask = ~text_inputs.attention_mask.bool()
+        transformer_image_inputs, transformer_text_inputs, output_attention_mask, ground_truth = \
+            get_transformer_input(image_outputs, text_outputs, text_inputs.attention_mask)
+        text_padding_mask = ~output_attention_mask.bool()
         outputs = cm_transformer(transformer_image_inputs.to(device), transformer_text_inputs.to(device), text_padding_mask.to(device))
         loss = criterion(outputs, ground_truth.to(device))
         optimizer.zero_grad()
