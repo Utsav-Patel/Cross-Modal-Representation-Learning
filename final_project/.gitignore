@@ -1,4 +1,6 @@
 saved_models/
 __pycache__/
 Test.ipynb
+example.ipynb
 model.pt
+wandb/

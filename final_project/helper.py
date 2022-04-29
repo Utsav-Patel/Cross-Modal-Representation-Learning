@@ -12,7 +12,7 @@ def get_transformer_input(image_features, text_embedding, input_attention_mask):
 
     final_image_features = torch.zeros(output_batch_size, *image_features.shape[1:])
     final_text_embeddings = torch.zeros(output_batch_size, *text_embedding.shape[1:])
-    output_attention_mask = torch.zeros(output_batch_size, input_attention_mask.shape[1:])
+    output_attention_mask = torch.zeros(output_batch_size, *input_attention_mask.shape[1:])
 
     final_image_features[:input_batch_size] = image_features
     final_text_embeddings[:input_batch_size] = text_embedding
@@ -36,3 +36,8 @@ def get_transformer_input(image_features, text_embedding, input_attention_mask):
 
 def save_model(model, fpath):
     torch.save(model, fpath)
+
+
+def freeze_params(model):
+    for param in model.parameters():
+        param.requires_grad = False
