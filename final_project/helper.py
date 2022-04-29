@@ -3,6 +3,7 @@ import random
 import numpy as np
 from time import time
 from torch import nn
+from tqdm import tqdm
 
 
 def get_transformer_input(image_features, text_embedding, input_attention_mask):
@@ -72,11 +73,11 @@ def compute_ranks(sims):
     return np.asarray(ranks), preds
 
 
-def rank(rcps, imgs, attention_masks, model=None, retrieved_type='recipe', retrieved_range=1000, verbose=False,
-         device='cuda'):
+def rank(rcps: list, imgs: list, attention_masks: list, model=None, retrieved_type='recipe', retrieved_range=1000,
+         verbose=False, device='cuda'):
     t1 = time()
     N = retrieved_range
-    data_size = imgs.shape[0]
+    data_size = len(imgs)
     glob_rank = []
     glob_recall = {1: 0.0, 5: 0.0, 10: 0.0}
     softmax = nn.Softmax(dim=-1)
@@ -140,3 +141,26 @@ def rank(rcps, imgs, attention_masks, model=None, retrieved_type='recipe', retri
         print(f'=>retrieved_range={retrieved_range}, MedR={medR:.4f}({medR_std:.4f}), time={t2 - t1:.4f}s')
         print(f'Global recall: 1: {glob_recall[1]:.4f}, 5: {glob_recall[5]:.4f}, 10: {glob_recall[10]:.4f}')
     return medR, medR_std, glob_recall
+
+
+def calculate_metrics(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer, device='cuda'):
+    print('Calculating Metrics')
+    image_encoder.eval()
+    text_encoder.eval()
+    cm_transformer.eval()
+
+    text_embeddings = list()
+    image_features = list()
+    attention_masks = list()
+
+    for text, image in tqdm(dataloader):
+        text_inputs = tokenizer(text, truncation=True, padding=True, return_tensors="pt").to(device)
+        text_outputs = text_encoder(**text_inputs)
+        image_outputs = image_encoder(image.to(device))
+
+        for text_output, image_feature, attention_mask in zip(text_outputs, image_outputs, text_inputs.attention_mask):
+            text_embeddings.append(text_output)
+            image_features.append(image_feature)
+            attention_masks.append(attention_mask)
+
+    rank(text_embeddings, image_features, attention_masks, model=cm_transformer, device=device, verbose=True)

@@ -50,10 +50,6 @@ def evaluate(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer,
     text_encoder.eval()
     cm_transformer.eval()
 
-    text_embeddings = list()
-    image_features = list()
-    attention_masks = list()
-
     val_loss, total_samples = 0, 0
     for text, image in tqdm(dataloader):
         val_its += 1
@@ -63,12 +59,6 @@ def evaluate(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer,
         transformer_image_inputs, transformer_text_inputs, output_attention_mask, ground_truth = \
             get_transformer_input(image_outputs, text_outputs, text_inputs.attention_mask)
         text_padding_mask = ~output_attention_mask.bool()
-
-        for text_output, image_feature, attention_mask in zip(text_outputs, image_outputs, text_inputs.attention_mask):
-            text_embeddings.append(text_output)
-            image_features.append(image_feature)
-            attention_masks.append(attention_mask)
-
         outputs = cm_transformer(transformer_image_inputs.to(device), transformer_text_inputs.to(device), text_padding_mask.to(device))
         loss = criterion(outputs, ground_truth.to(device).long())
 
@@ -77,8 +67,6 @@ def evaluate(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer,
 
         if val_its % 10 == 0:
             wandb.log({'val_loss': round(val_loss / total_samples, 4)})
-
-    rank(text_embeddings, image_features, attention_masks, model=cm_transformer, device=device)
 
     return val_loss / total_samples
 
