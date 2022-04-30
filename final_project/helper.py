@@ -155,8 +155,8 @@ def calculate_metrics(image_encoder, text_encoder, cm_transformer, dataloader, t
 
     for text, image in tqdm(dataloader):
         text_inputs = tokenizer(text, truncation=True, padding=True, return_tensors="pt").to(device)
-        text_outputs = text_encoder(**text_inputs)
-        image_outputs = image_encoder(image.to(device))
+        text_outputs = text_encoder(**text_inputs).detach().cpu()
+        image_outputs = image_encoder(image.to(device)).detach().cpu()
 
         for text_output, image_feature, attention_mask in zip(text_outputs, image_outputs, text_inputs.attention_mask):
             text_embeddings.append(text_output)
