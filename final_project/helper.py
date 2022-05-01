@@ -148,6 +148,7 @@ def calculate_metrics(image_encoder, text_encoder, cm_transformer, dataloader, t
     text_embeddings = list()
     image_features = list()
     attention_masks = list()
+
     with torch.no_grad():
         for text, image in tqdm(dataloader):
             text_inputs = tokenizer(text, truncation=True, padding=True, return_tensors="pt").to(device)
