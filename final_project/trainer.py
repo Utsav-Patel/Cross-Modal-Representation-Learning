@@ -74,7 +74,7 @@ def evaluate(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer,
 def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dataloader, tokenizer, save_dir, train_encoders=False, device='cuda', num_epochs=100, lr=2e-5):
     min_val_loss = float('inf')
     project_name = 'cross_modal_attention'
-    wandb.init(project=project_name)
+    wandb.init(project=project_name, entity='cs536')
     save_dir = os.path.join(save_dir, wandb.run.id)
     os.makedirs(save_dir, exist_ok=True)
     criterion = nn.CrossEntropyLoss()

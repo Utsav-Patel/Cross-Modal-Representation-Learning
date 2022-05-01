@@ -73,8 +73,13 @@ def compute_ranks(sims):
     return np.asarray(ranks), preds
 
 
-def rank(rcps: list, imgs: list, attention_masks: list, model=None, retrieved_type='recipe', retrieved_range=1000,
+def rank(rcps: list, imgs: list, attention_masks: list, model=None, retrieved_type='recipe', retrieved_range=100,
          verbose=False, device='cuda'):
+
+    # save_model({'rcps': rcps, 'imgs': imgs, 'attention_masks': attention_masks}, 'data.pt')
+    # rcps = torch.cat(rcps, dim=0)
+    # imgs = torch.cat(imgs, dim=0)
+    # attention_masks = torch.cat(attention_masks, dim=0)
     t1 = time()
     N = retrieved_range
     data_size = len(imgs)
@@ -86,7 +91,7 @@ def rank(rcps: list, imgs: list, attention_masks: list, model=None, retrieved_ty
     # if draw_hist:
     #     plt.figure(figsize=(16, 6))
     # average over 10 sets
-    for i in range(10):
+    for i in range(2):
         ids_sub = np.random.choice(data_size, N, replace=False)
         # imgs_sub = imgs[ids_sub, :]
         # rcps_sub = rcps[ids_sub, :]
@@ -94,23 +99,26 @@ def rank(rcps: list, imgs: list, attention_masks: list, model=None, retrieved_ty
         rcps_sub = [rcps[ind] for ind in ids_sub]
         attention_masks_sub = [attention_masks[ind] for ind in ids_sub]
         probs = np.zeros((N, N))
-        for x in range(N):
+        for x in tqdm(range(N)):
             for y in range(N):
                 # if retrieved_type == 'recipe':
                 #     probs[x] = model(imgs_sub[x].repeat(N, 1, 1), rcps_sub)[:, 1]
                 # else:
                 #     probs[x] = model(imgs_sub, rcps_sub[x].repeat(N, 1, 1))[:, 1]
-                if retrieved_type == 'recipe':
-                    probs[x][y] = softmax(model(imgs_sub[x].to(device), rcps_sub[y].to(device),
-                                                ~attention_masks_sub[y].bool().to(device)))[0, 1]
-                else:
-                    probs[x][y] = softmax(model(imgs_sub[y].to(device), rcps_sub[x].to(device),
-                                                ~attention_masks_sub[y].bool().to(device)))[0, 1]
+                try:
+                    if retrieved_type == 'recipe':
+                        probs[x][y] = softmax(model(imgs_sub[x].unsqueeze(0).to(device), rcps_sub[y].unsqueeze(0).to(device),
+                                                    ~attention_masks_sub[y].bool().unsqueeze(0).to(device)))[0, 1]
+                    else:
+                        probs[x][y] = softmax(model(imgs_sub[y].unsqueeze(0).to(device), rcps_sub[x].unsqueeze(0).to(device),
+                                                    ~attention_masks_sub[y].bool().unsqueeze(0).to(device)))[0, 1]
+                except RuntimeError as e:
+                    print(imgs_sub[x].unsqueeze(0).shape, rcps_sub[y].unsqueeze(0).shape, attention_masks_sub[y].unsqueeze(0).shape)
+                    print(attention_masks_sub)
+                    print(ids_sub, x, y)
+                    raise(RuntimeError(str(e)))
         # loop through the N similarities for images
         ranks, _ = compute_ranks(probs)
-
-        # pickler(ranks, 'ranks.pkl')
-        # pickler(ids_sub, 'indices.pkl')
 
         recall = {1: 0.0, 5: 0.0, 10: 0.0}
         for ii in recall.keys():
@@ -119,17 +127,6 @@ def rank(rcps: list, imgs: list, attention_masks: list, model=None, retrieved_ty
         for ii in recall.keys():
             glob_recall[ii] += recall[ii]
         glob_rank.append(med)
-        # if draw_hist:
-        #     ranks = np.array(ranks)
-        #     plt.subplot(2, 5, i + 1)
-        #     n, bins, patches = plt.hist(x=ranks, bins='auto', color='#0504aa', alpha=0.7, rwidth=0.85)
-        #     plt.grid(axis='y', alpha=0.75)
-        #     plt.ylim(top=300)
-        #     plt.text(23, 45, 'avgR(std) = {:.2f}({:.2f})\nmedR={:.2f}\n#<{:d}:{:d}|#={:d}:{:d}|#>{:d}:{:d}'.format(
-        #         np.mean(ranks), np.std(ranks), np.median(ranks),
-        #         med, (ranks < med).sum(), med, (ranks == med).sum(), med, (ranks > med).sum()))
-    # if draw_hist:
-    #     plt.savefig(f'hist_{epoch}.png')
 
     for i in glob_recall.keys():
         glob_recall[i] = glob_recall[i] / 10
@@ -142,7 +139,6 @@ def rank(rcps: list, imgs: list, attention_masks: list, model=None, retrieved_ty
         print(f'Global recall: 1: {glob_recall[1]:.4f}, 5: {glob_recall[5]:.4f}, 10: {glob_recall[10]:.4f}')
     return medR, medR_std, glob_recall
 
-
 def calculate_metrics(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer, device='cuda'):
     print('Calculating Metrics')
     image_encoder.eval()
@@ -152,15 +148,16 @@ def calculate_metrics(image_encoder, text_encoder, cm_transformer, dataloader, t
     text_embeddings = list()
     image_features = list()
     attention_masks = list()
+    with torch.no_grad():
+        for text, image in tqdm(dataloader):
+            text_inputs = tokenizer(text, truncation=True, padding=True, return_tensors="pt").to(device)
+            text_outputs = text_encoder(**text_inputs)
+            image_outputs = image_encoder(image.to(device))
 
-    for text, image in tqdm(dataloader):
-        text_inputs = tokenizer(text, truncation=True, padding=True, return_tensors="pt").to(device)
-        text_outputs = text_encoder(**text_inputs)
-        image_outputs = image_encoder(image.to(device))
+            for text_output, image_feature, attention_mask in zip(text_outputs, image_outputs, text_inputs.attention_mask):
+                text_embeddings.append(text_output.cpu())
+                image_features.append(image_feature.cpu())
+                attention_masks.append(attention_mask.cpu())
 
-        for text_output, image_feature, attention_mask in zip(text_outputs, image_outputs, text_inputs.attention_mask):
-            text_embeddings.append(text_output)
-            image_features.append(image_feature)
-            attention_masks.append(attention_mask)
-
-    rank(text_embeddings, image_features, attention_masks, model=cm_transformer, device=device, verbose=True)
+        return rank(text_embeddings, image_features, attention_masks, model=cm_transformer, device=device, verbose=True)
+        
