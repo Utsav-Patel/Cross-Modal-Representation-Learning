@@ -11,7 +11,7 @@ num_its = 0
 val_its = 0
 
 
-def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer, criterion, optimizer, train_encoders=False, device='cuda'):
+def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer, criterion, optimizer, train_encoders=False, device='cuda', save_dir=None):
     global num_its
     print('New epoch!')
     if train_encoders:
@@ -33,9 +33,15 @@ def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tok
         loss = criterion(outputs, ground_truth.to(device).long())
         optimizer.zero_grad()
         loss.backward()
-        
+        optimizer.step()
         train_loss += loss.item() * image.shape[0]
         total_samples += image.shape[0]
+
+        if num_its % 1000 == 0:
+            save_dict = {
+                'cm_transformer': cm_transformer.state_dict()
+            }
+            save_model(save_dict, fpath=os.path.join(save_dir, f'model_train_encoders_{train_encoders}_num_its_{num_its}.pt'))
 
         if num_its % 10 == 0:
             wandb.log({'train_loss': round(train_loss / total_samples, 4)})
@@ -93,7 +99,7 @@ def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dat
 
     for epoch in range(num_epochs):
         train_loss = train_one_epoch(image_encoder, text_encoder, cm_transformer, train_dataloader, 
-                                    tokenizer, criterion, optimizer, train_encoders, device)
+                                    tokenizer, criterion, optimizer, train_encoders, device, save_dir)
         val_loss = evaluate(image_encoder, text_encoder, cm_transformer, 
                             val_dataloader, tokenizer, criterion, device)
 

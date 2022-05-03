@@ -4,6 +4,7 @@ import math
 from torchvision import models
 from transformers import BertConfig, BertModel, BertTokenizer, ViTModel
 import pdb
+    
 
 class TextEncoder(nn.Module):
     def __init__(self, num_heads, num_hidden_layers):
