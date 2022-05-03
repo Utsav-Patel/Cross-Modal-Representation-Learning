@@ -34,6 +34,7 @@ def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tok
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+
         train_loss += loss.item() * image.shape[0]
         total_samples += image.shape[0]
 
