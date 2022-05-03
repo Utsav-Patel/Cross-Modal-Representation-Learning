@@ -20,6 +20,7 @@ def get_transformer_input(image_features, text_embedding, input_attention_mask):
 
     final_image_features[:input_batch_size] = image_features
     final_text_embeddings[:input_batch_size] = text_embedding
+    output_attention_mask[:input_batch_size] = input_attention_mask
 
     for run_num in range(num_negative_to_positive_sample_ratio):
         a = torch.randperm(input_batch_size)
