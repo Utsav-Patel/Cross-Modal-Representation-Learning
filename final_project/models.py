@@ -41,14 +41,15 @@ class SinusoidalPositionalEncoding(nn.Module):
         pe = torch.zeros(max_len, 1, d_model)
         pe[:, 0, 0::2] = torch.sin(position * div_term)
         pe[:, 0, 1::2] = torch.cos(position * div_term)
+        pe = torch.transpose(pe, 0, 1)
         self.register_buffer('pe', pe)
 
     def forward(self, x):
         """
         Args:
-            x: Tensor, shape [seq_len, batch_size, embedding_dim]
+            x: Tensor, shape [batch_size, seq_len, embedding_dim]
         """
-        x = x + self.pe[:x.size(0)]
+        x = x + self.pe[0, :x.size(1), :]
         return self.dropout(x)
 
 
