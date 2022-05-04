@@ -5,6 +5,7 @@ import wandb
 from torch import nn
 from helper import get_transformer_input, save_model, rank
 from tqdm import tqdm
+from torch.optim.lr_scheduler import ExponentialLR
 
 num_its = 0
 val_its = 0
@@ -99,6 +100,8 @@ def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dat
     else:
         optimizer = torch.optim.SGD(cm_transformer.parameters(), lr=lr)
 
+    scheduler = ExponentialLR(optimizer, gamma=0.1, verbose=True)
+
     for epoch in range(num_epochs):
 
         train_loss = train_one_epoch(image_encoder, text_encoder, cm_transformer, train_dataloader, 
@@ -125,4 +128,6 @@ def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dat
         save_model(save_dict, fpath=os.path.join(save_dir, f'model_train_encoders_{train_encoders}_epoch_{epoch}.pt'))
 
         print(f'Epoch: {epoch}, Train loss: {train_loss}, Val loss: {val_loss}')
+
+        scheduler.step()
 
