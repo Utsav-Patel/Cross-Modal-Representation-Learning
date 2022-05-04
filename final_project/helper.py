@@ -9,10 +9,6 @@ from tqdm import tqdm
 def get_transformer_input(image_features, text_embedding, input_attention_mask):
     num_negative_to_positive_sample_ratio = 1
 
-    image_features = image_features
-    text_embedding = text_embedding
-    input_attention_mask = input_attention_mask
-
     input_batch_size = image_features.shape[0]
     output_batch_size = (num_negative_to_positive_sample_ratio + 1) * input_batch_size
     ground_truths = torch.zeros(output_batch_size)
