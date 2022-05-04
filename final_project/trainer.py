@@ -86,7 +86,7 @@ def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dat
     wandb.init(project=project_name, entity='cs536')
     save_dir = os.path.join(save_dir, wandb.run.id)
     os.makedirs(save_dir, exist_ok=True)
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(weight=torch.Tensor([1, 2]))
     if train_encoders:
         optimizer = torch.optim.SGD(
             [

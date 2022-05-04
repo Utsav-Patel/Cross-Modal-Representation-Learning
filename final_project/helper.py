@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 
 def get_transformer_input(image_features, text_embedding, input_attention_mask):
-    num_negative_to_positive_sample_ratio = 1
+    num_negative_to_positive_sample_ratio = 2
 
     input_batch_size = image_features.shape[0]
     output_batch_size = (num_negative_to_positive_sample_ratio + 1) * input_batch_size
