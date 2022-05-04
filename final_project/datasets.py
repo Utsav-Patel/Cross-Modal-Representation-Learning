@@ -1,12 +1,8 @@
-import torch
 import os
-import numpy as np
 import json
 import lmdb
-import random
-import pickle
 
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from torchvision import transforms
 from PIL import Image
 from io import BytesIO
@@ -45,7 +41,7 @@ class Recipe1MDataset(Dataset):
     """
     def __init__(
         self, 
-        lmdb_file=f'/common/home/as3503/as3503/courses/cs536/dataset/Recipe1M.lmdb',
+        lmdb_file=f'/common/users/upp10/cs536/Recipe1M/Recipe1M.lmdb',
         part='', transform=None, resolution=256):
 
         assert part in ['', 'train', 'val', 'test'], "part has to be in ['', 'train', 'val', 'test']"
