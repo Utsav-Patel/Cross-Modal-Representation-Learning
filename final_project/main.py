@@ -24,24 +24,24 @@ if __name__ == '__main__':
     parser.add_argument('--train_encoders', default=False, type=bool)
     args = parser.parse_args()
 
+    device = args.device
+
     saved_model_path = args.pretrained_ckpt_path
     saved_weights = torch.load(saved_model_path, map_location='cpu')
-
-    transformer_model_path = args.cm_ckpt_path
-    if transformer_model_path:
-        transformer_weights = torch.load(transformer_model_path, map_location='cpu')
-    device = args.device
 
     text_encoder = TextEncoder(2, 2)
     text_encoder.load_state_dict(saved_weights['txt_encoder'])
     text_encoder = text_encoder.to(device)
+
     image_encoder = ImageEncoder()
     image_encoder.load_state_dict(saved_weights['img_encoder'])
     image_encoder = image_encoder.to(device)
 
     cm_transformer = CrossModalAttention(n_heads=args.num_attention_heads, n_layers=args.num_hidden_layers)
     # cm_transformer.apply(init_weights)
+    transformer_model_path = args.cm_ckpt_path
     if transformer_model_path:
+        transformer_weights = torch.load(transformer_model_path, map_location='cpu')
         cm_transformer.load_state_dict(transformer_weights['cm_transformer'])
     cm_transformer = cm_transformer.to(device)
 
