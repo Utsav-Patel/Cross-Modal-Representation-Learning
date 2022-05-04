@@ -3,6 +3,7 @@ from torch import nn
 import math
 from transformers import BertConfig, BertModel, ViTModel
 import pdb
+    
 
 
 class TextEncoder(nn.Module):

@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     # Change paths here.
     saved_model_path = '/common/home/as3503/as3503/courses/cs536/final_project/final_project/saved_models/model.pt'
-    transformer_model_path = '/common/home/as3503/as3503/courses/cs536/final_project/final_project/saved_models/3shrex3f/model_train_encoders_False_epoch_1.pt'
+    transformer_model_path = '/common/home/as3503/as3503/courses/cs536/final_project/final_project/saved_models/1b1huuko/model_train_encoders_False_epoch_0.pt'
 
     saved_weights = torch.load(saved_model_path, map_location='cpu')
     transformer_weights = torch.load(transformer_model_path, map_location='cpu')
