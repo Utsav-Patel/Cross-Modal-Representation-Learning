@@ -30,7 +30,7 @@ def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tok
         text_padding_mask = ~output_attention_mask.bool()
         outputs = cm_transformer(transformer_image_inputs.to(device), transformer_text_inputs.to(device),
                                  text_padding_mask.to(device))
-        loss = criterion(outputs, ground_truth.to(device).long())
+        loss = criterion(outputs.to(device), ground_truth.long().to(device))
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
