@@ -6,19 +6,18 @@ from torch import nn
 from helper import get_transformer_input, save_model, rank
 from tqdm import tqdm
 
-
 num_its = 0
 val_its = 0
 
 
-def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer, criterion, optimizer, train_encoders=False, device='cuda'):
+def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer, criterion, optimizer,
+                    train_encoders=False, device='cuda'):
     global num_its
     print('New epoch!')
     if train_encoders:
         image_encoder.train()
         text_encoder.train()
     cm_transformer.train()
-
 
     train_loss, total_samples = 0, 0
     for text, image in tqdm(dataloader):
@@ -29,12 +28,13 @@ def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tok
         transformer_image_inputs, transformer_text_inputs, output_attention_mask, ground_truth = \
             get_transformer_input(image_outputs, text_outputs, text_inputs.attention_mask)
         text_padding_mask = ~output_attention_mask.bool()
-        outputs = cm_transformer(transformer_image_inputs.to(device), transformer_text_inputs.to(device), text_padding_mask.to(device))
+        outputs = cm_transformer(transformer_image_inputs.to(device), transformer_text_inputs.to(device),
+                                 text_padding_mask.to(device))
         loss = criterion(outputs, ground_truth.to(device).long())
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        
+
         train_loss += loss.item() * image.shape[0]
         total_samples += image.shape[0]
 
@@ -60,7 +60,8 @@ def evaluate(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer,
         transformer_image_inputs, transformer_text_inputs, output_attention_mask, ground_truth = \
             get_transformer_input(image_outputs, text_outputs, text_inputs.attention_mask)
         text_padding_mask = ~output_attention_mask.bool()
-        outputs = cm_transformer(transformer_image_inputs.to(device), transformer_text_inputs.to(device), text_padding_mask.to(device))
+        outputs = cm_transformer(transformer_image_inputs.to(device), transformer_text_inputs.to(device),
+                                 text_padding_mask.to(device))
         loss = criterion(outputs, ground_truth.to(device).long())
 
         val_loss += loss.item() * image.shape[0]
@@ -72,7 +73,8 @@ def evaluate(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer,
     return val_loss / total_samples
 
 
-def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dataloader, tokenizer, save_dir, train_encoders=False, device='cuda', num_epochs=100, lr=2e-5):
+def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dataloader, tokenizer, save_dir,
+          train_encoders=False, device='cuda', num_epochs=100, lr=2e-5):
     min_val_loss = float('inf')
     project_name = 'cross_modal_attention'
     wandb.init(project=project_name, entity='cs536')
@@ -80,7 +82,7 @@ def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dat
     os.makedirs(save_dir, exist_ok=True)
     criterion = nn.CrossEntropyLoss()
     if train_encoders:
-        optimizer = torch.optim.Adam(
+        optimizer = torch.optim.SGD(
             [
                 {'params': image_encoder.parameters()},
                 {'params': text_encoder.parameters()},
@@ -89,13 +91,12 @@ def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dat
             lr=lr
         )
     else:
-        optimizer = torch.optim.Adam(cm_transformer.parameters(), lr=lr)
-
+        optimizer = torch.optim.SGD(cm_transformer.parameters(), lr=lr)
 
     for epoch in range(num_epochs):
-        train_loss = train_one_epoch(image_encoder, text_encoder, cm_transformer, train_dataloader, 
+        train_loss = train_one_epoch(image_encoder, text_encoder, cm_transformer, train_dataloader,
                                     tokenizer, criterion, optimizer, train_encoders, device)
-        val_loss = evaluate(image_encoder, text_encoder, cm_transformer, 
+        val_loss = evaluate(image_encoder, text_encoder, cm_transformer,
                             val_dataloader, tokenizer, criterion, device)
 
         # if val_loss < min_val_loss:

@@ -1,9 +1,9 @@
 import torch
 from torch import nn
 import math
-from torchvision import models
-from transformers import BertConfig, BertModel, BertTokenizer, ViTModel
+from transformers import BertConfig, BertModel, ViTModel
 import pdb
+
 
 class TextEncoder(nn.Module):
     def __init__(self, num_heads, num_hidden_layers):
@@ -55,6 +55,7 @@ class SinusoidalPositionalEncoding(nn.Module):
 class CrossModalAttention(nn.Module):
     def __init__(self, model_dim=768, n_heads=2, n_layers=2, num_image_patches=197, num_classes=2, drop_rate=0.1):
         super().__init__()
+        self.d_model = model_dim
         self.text_pos_embed = SinusoidalPositionalEncoding(model_dim, dropout=drop_rate)
         self.cls_token = nn.Parameter(torch.zeros(1, 1, model_dim))
         self.sep_token = nn.Parameter(torch.zeros(1, 1, model_dim))
@@ -63,24 +64,29 @@ class CrossModalAttention(nn.Module):
         layers = nn.TransformerEncoderLayer(
             d_model=model_dim,
             nhead=n_heads,
-            batch_first=True
+            batch_first=True,
+            dropout=drop_rate
         )
         self.encoder = nn.TransformerEncoder(layers, num_layers=n_layers)
         self.cls_projection = nn.Linear(model_dim, num_classes)
-        
+
     def forward(self, image_features, text_features, src_key_padding_mask=None):
+        image_features *= math.sqrt(self.d_model)
+        text_features *= math.sqrt(self.d_model)
+
         batch_size = image_features.shape[0]
         cls_token = self.cls_token.expand(batch_size, -1, -1)
         image_features = torch.cat((cls_token, image_features), dim=1)
         image_features = image_features + self.image_pos_embed
         image_features = self.image_pos_drop(image_features)
-        
+
         text_features = self.text_pos_embed(text_features)
-        
+
         sep_token = self.sep_token.expand(batch_size, -1, -1)
         transformer_input = torch.cat((image_features, sep_token, text_features), dim=1)
         if src_key_padding_mask is not None:
-            src_key_padding_mask = torch.cat((torch.zeros(batch_size, image_features.shape[1] + 1).to(transformer_input.device), src_key_padding_mask), dim=1)
+            src_key_padding_mask = torch.cat((torch.zeros(batch_size, image_features.shape[1] + 1).to(
+                transformer_input.device), src_key_padding_mask), dim=1)
         transformer_outputs = self.encoder(transformer_input, src_key_padding_mask=src_key_padding_mask)
         cls_outputs = transformer_outputs[:, 0, :]
         return self.cls_projection(cls_outputs)

@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 
 from datasets import Recipe1MDataset
 from models import TextEncoder, ImageEncoder, CrossModalAttention
@@ -13,17 +12,16 @@ if __name__ == '__main__':
 
     saved_model_path = 'saved_models/model.pt'
     saved_weights = torch.load(saved_model_path, map_location='cpu')
-    transformer_model_path = '/common/home/as3503/as3503/courses/cs536/final_project/final_project/saved_models/1s0qc5ue/model_train_encoders_False_epoch_0.pt'
+    transformer_model_path = '/common/home/upp10/Desktop/Cross-Modal-Representation-Learning/final_project/saved_models/temp_model.pt'
 
     transformer_weights = torch.load(transformer_model_path, map_location='cpu')
-    device = 'cuda:1'
+    device = 'cuda:0'
     text_encoder = TextEncoder(2, 2)
     text_encoder.load_state_dict(saved_weights['txt_encoder'])
     text_encoder = text_encoder.to(device)
     image_encoder = ImageEncoder()
     image_encoder.load_state_dict(saved_weights['img_encoder'])
     image_encoder = image_encoder.to(device)
-    # cm_transformer = CrossModalAttention().to(device)
 
     cm_transformer = CrossModalAttention()
     cm_transformer.load_state_dict(transformer_weights['cm_transformer'])
@@ -51,5 +49,5 @@ if __name__ == '__main__':
         save_dir=save_dir,
         train_encoders=False,
         device=device,
-        lr=1e-7
+        lr=1e-2
     )
