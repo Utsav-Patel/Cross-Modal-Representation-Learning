@@ -40,13 +40,22 @@ def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tok
         total_samples += image.shape[0]
 
         if num_its % 1000 == 0:
-            save_dict = {
-                'cm_transformer': cm_transformer.state_dict()
-            }
+
+            if train_encoders:
+                save_dict = {
+                    'img_encoder': image_encoder.state_dict(),
+                    'txt_encoder': text_encoder.state_dict(),
+                    'cm_transformer': cm_transformer.state_dict()
+                }
+            else:
+                save_dict = {
+                    'cm_transformer': cm_transformer.state_dict()
+                }
+
             save_model(save_dict, fpath=os.path.join(save_dir, f'model_train_encoders_{train_encoders}_num_its_{num_its}.pt'))
 
         if num_its % 10 == 0:
-            wandb.log({'train_loss': round(train_loss / total_samples, 4)})
+            wandb.log({'train_loss': round(train_loss / total_samples, 8)})
 
     return train_loss / total_samples
 
@@ -75,14 +84,13 @@ def evaluate(image_encoder, text_encoder, cm_transformer, dataloader, tokenizer,
         total_samples += image.shape[0]
 
         if val_its % 10 == 0:
-            wandb.log({'val_loss': round(val_loss / total_samples, 4)})
+            wandb.log({'val_loss': round(val_loss / total_samples, 8)})
 
     return val_loss / total_samples
 
 
 def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dataloader, tokenizer, save_dir,
           train_encoders=False, device='cuda', num_epochs=100, lr=2e-5):
-    min_val_loss = float('inf')
     project_name = 'cross_modal_attention'
     wandb.init(project=project_name, entity='cs536')
     save_dir = os.path.join(save_dir, wandb.run.id)
@@ -100,7 +108,7 @@ def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dat
     else:
         optimizer = torch.optim.SGD(cm_transformer.parameters(), lr=lr)
 
-    scheduler = ExponentialLR(optimizer, gamma=0.1, verbose=True)
+    scheduler = ExponentialLR(optimizer, gamma=0.33, verbose=True)
 
     for epoch in range(num_epochs):
 
@@ -113,8 +121,8 @@ def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dat
         min_val_loss = val_loss
         if train_encoders:
             save_dict = {
-                'image_encoder': image_encoder.state_dict(),
-                'text_encoder': text_encoder.state_dict(),
+                'img_encoder': image_encoder.state_dict(),
+                'txt_encoder': text_encoder.state_dict(),
                 'cm_transformer': cm_transformer.state_dict()
             }
         else:
@@ -126,8 +134,6 @@ def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dat
         save_dict['val_loss'] = val_loss
 
         save_model(save_dict, fpath=os.path.join(save_dir, f'model_train_encoders_{train_encoders}_epoch_{epoch}.pt'))
-
         print(f'Epoch: {epoch}, Train loss: {train_loss}, Val loss: {val_loss}')
-
         scheduler.step()
 

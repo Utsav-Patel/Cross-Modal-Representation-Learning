@@ -57,8 +57,8 @@ if __name__ == '__main__':
         print("Training encoders!")
 
     batch_size = args.batch_size
-    train_loader = DataLoader(train_dataset, batch_size=batch_size)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
     train(
         image_encoder=image_encoder,
