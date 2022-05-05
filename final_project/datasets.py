@@ -46,11 +46,11 @@ class Recipe1MDataset(Dataset):
 
         assert part in ['', 'train', 'val', 'test'], "part has to be in ['', 'train', 'val', 'test']"
 
-        if transform is None:
-            if part == 'val':
-                self.transform = get_train_transforms([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-            else:
-                self.transform = get_val_transforms([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+        # if transform is None:
+        #     if part == 'val':
+        #         self.transform = get_train_transforms([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+        #     else:
+        self.transform = get_val_transforms([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 
         self.resolution = resolution
 
