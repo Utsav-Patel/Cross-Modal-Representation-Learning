@@ -39,7 +39,7 @@ def train_one_epoch(image_encoder, text_encoder, cm_transformer, dataloader, tok
         train_loss += loss.item() * image.shape[0]
         total_samples += image.shape[0]
 
-        if num_its % 1000 == 0:
+        if num_its % 5000 == 0:
 
             if train_encoders:
                 save_dict = {
