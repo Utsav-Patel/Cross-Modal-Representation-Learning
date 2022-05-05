@@ -117,8 +117,6 @@ def train(image_encoder, text_encoder, cm_transformer, train_dataloader, val_dat
         val_loss = evaluate(image_encoder, text_encoder, cm_transformer,
                             val_dataloader, tokenizer, criterion, device)
 
-        # if val_loss < min_val_loss:
-        min_val_loss = val_loss
         if train_encoders:
             save_dict = {
                 'img_encoder': image_encoder.state_dict(),
